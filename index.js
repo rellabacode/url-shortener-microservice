@@ -1,24 +1,195 @@
 require('dotenv').config();
+// import dotenv from 'dotenv';
+
+// dotenv.config();
+
 const express = require('express');
+// import express from 'express';
 const cors = require('cors');
+// import cors from 'cors';
+
+var corsOptions = {
+    origin: function (origin, callback) {
+        callback(null, true);
+    }
+}
+
 const app = express();
+const bodyParser = require("body-parser");
+// import bodyParser from "body-parser";
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
+const dns = require("dns");
+// import dns from "dns";
 
-app.use(cors());
+const dnsOptions = {
+    all: true,
+};
+
+// const XMLHttpRequest = require('xhr2');
+// const fetch = require('node-fetch');
+// import fetch from 'node-fetch';
+
+
+// async function fetchUrl(uri){
+//     const response = await fetch(uri);
+//     console.log(response.status);
+//     return response.status;
+// }
+//
+// fetchUrl();
+
+const http = require("http");
+// import http from "http";
+const Url = require('url');
+// import {URL, parse} from 'url';
+// import validUrl from 'valid-url';
+
+const urlId = [];
+let urlIdInd = 0;
+
+// https://github.com/sindresorhus/is-url-superb/blob/main/index.js
+function isUrl(str) {
+    if (typeof str !== 'string') {
+        return false;
+    }
+
+    const trimmedStr = str.trim();
+    if (trimmedStr.includes(' ')) {
+        return false;
+    }
+
+    try {
+        new Url.URL(str); // eslint-disable-line no-new
+        console.log("isurl true");
+        return true;
+    } catch (e) {
+        console.log(e);
+        console.log("isurl false");
+        return false;
+    }
+}
+
+// https://github.com/Richienb/url-exist/blob/master/index.js
+function urlExists(url) {
+    return new Promise(function (resolve) {
+        if (!isUrl(url)) {
+            resolve(false);
+        }
+
+        const options = {
+            method: 'HEAD',
+            host: Url.parse(url).host,
+            path: Url.parse(url).pathname,
+            port: 80,
+        };
+
+        console.log(options);
+
+        const req = http.request(options, (res) => {
+            console.log("resolviendo segun codigo de estado " + res.statusCode);
+            resolve(res.statusCode < 400 || res.statusCode >= 500);
+        });
+
+        req.end();
+    });
+}
+
+
+// function makeRequest(method, url) {
+//     return new Promise(function (resolve, reject) {
+//         let xhr = new XMLHttpRequest();
+//         xhr.open(method, url);
+//         xhr.onload = function () {
+//             if (this.status >= 200 && this.status < 300) {
+//                 resolve(xhr.response);
+//             } else {
+//                 reject({
+//                     status: this.status,
+//                     statusText: xhr.statusText
+//                 });
+//             }
+//         };
+//         xhr.onerror = function () {
+//             reject({
+//                 status: this.status,
+//                 statusText: xhr.statusText
+//             });
+//         };
+//         xhr.send();
+//     });
+// }
+
+// async function doAjaxThings(url) {
+//     // await code here
+//     let result = await makeRequest("GET", url);
+//     // code below here will only execute when await makeRequest() finished loading
+//     return result;
+// }
+
+
+// app.use(cors());
+app.use(bodyParser.urlencoded({extended: "false"}));
+app.use(bodyParser.json());
 
 app.use('/public', express.static(`${process.cwd()}/public`));
 
-app.get('/', function(req, res) {
-  res.sendFile(process.cwd() + '/views/index.html');
+app.get('/', function (req, res) {
+    res.sendFile(process.cwd() + '/views/index.html');
 });
 
 // Your first API endpoint
-app.get('/api/hello', function(req, res) {
-  res.json({ greeting: 'hello API' });
+app.get('/api/hello', function (req, res) {
+    res.json({greeting: 'hello API'});
 });
 
-app.listen(port, function() {
-  console.log(`Listening on port ${port}`);
+app.get('/api/shorturl/:index([0-9]{1,})', function (req, res) {
+    console.log("param indexx " + req.params.index);
+    let index = parseInt(req.params.index);
+    if (index >= urlIdInd) return res.json({error: "invalid url"});
+
+
+    res.redirect(urlId[index]);
+});
+
+// function httpGet(theUrl)
+// {
+//     var xmlHttp = new XMLHttpRequest();
+//     xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+//     xmlHttp.send( null );
+//     return xmlHttp.responseText;
+// }
+
+
+app.post('/api/shorturl', cors(corsOptions), function (req, res) {
+    let url = req.body.url;
+    console.log("url " + url);
+    urlExists(url).then(function (value) {
+        if (!value) {
+            console.log("no existe la url");
+            return res.json({error: "invalid url"});
+        }
+
+        const urlParts = Url.parse(url);
+        console.log(urlParts);
+
+        dns.lookup(urlParts.host, dnsOptions,
+            function (err, addresses) {
+                console.log("validando url post");
+                console.log(addresses);
+                console.log(err);
+                if (err) return res.json({error: "invalid url"});
+                let index = urlId.indexOf(url);
+                if (index > -1) return res.json({original_url: url, short_url: index});
+                console.log("storing " + url);
+                urlId.push(url);
+                return res.json({original_url: url, short_url: urlIdInd++});
+            });
+    });
+});
+
+
+app.listen(port, function () {
+    console.log(`Listening on port ${port}`);
 });
