@@ -164,7 +164,7 @@ app.get('/api/hello', function (req, res) {
     res.json({greeting: 'hello API'});
 });
 
-app.get('/api/shorturl/:index([0-9]{1,})', function (req, res) {
+app.get('/api/shorturl/:index([0-9]{1,})', cors(corsOptions), function (req, res) {
     console.log("param indexx " + req.params.index);
     console.log("indexes " + urlId.length);
     console.log("index " + urlIdInd);
@@ -185,7 +185,7 @@ app.get('/api/shorturl/:index([0-9]{1,})', function (req, res) {
 // }
 
 
-app.post('/api/shorturl', function (req, res) {
+app.post('/api/shorturl', cors(corsOptions), function (req, res) {
     let url = req.body.url;
     console.log("url " + url);
     urlExists(url).then(function (value) {
