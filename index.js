@@ -166,10 +166,13 @@ app.get('/api/hello', function (req, res) {
 
 app.get('/api/shorturl/:index([0-9]{1,})', function (req, res) {
     console.log("param indexx " + req.params.index);
+    console.log("indexes " + urlId.length);
+    console.log("index " + urlIdInd);
+
     let index = parseInt(req.params.index);
     if (index >= urlIdInd) return res.json({error: "invalid url"});
 
-
+    console.log("redirigiendo a " + urlId[index]);
     res.redirect(urlId[index]);
 });
 
