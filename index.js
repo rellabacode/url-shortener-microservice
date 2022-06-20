@@ -170,10 +170,10 @@ app.get('/api/shorturl/:index([0-9]{1,})', function (req, res) {
     console.log("index " + urlIdInd);
 
     let index = parseInt(req.params.index);
-    if (index >= urlIdInd) return res.json({error: "invalid url"});
+    if (!NaN(index) || index >= urlIdInd) return res.status(404).json({error: "invalid url"});
 
     console.log("redirigiendo a " + urlId[index]);
-    res.redirect(urlId[index]);
+    return res.status(301).redirect(urlId[index]);
 });
 
 // function httpGet(theUrl)
@@ -185,14 +185,14 @@ app.get('/api/shorturl/:index([0-9]{1,})', function (req, res) {
 // }
 
 
-app.post('/api/shorturl', cors(corsOptions), function (req, res) {
+app.post('/api/shorturl', function (req, res) {
     let url = req.body.url;
     console.log("url " + url);
     urlExists(url).then(function (value) {
         console.log("tras urlExists");
         if (!value) {
             console.log("no existe la url");
-            return res.json({error: "invalid url"});
+            return res.status(401).json({error: "invalid url"});
         }
 
         const urlParts = Url.parse(url);
