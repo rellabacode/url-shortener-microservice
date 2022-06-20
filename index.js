@@ -170,7 +170,7 @@ app.get('/api/shorturl/:index([0-9]{1,})', cors(corsOptions), function (req, res
     console.log("index " + urlIdInd);
 
     let index = parseInt(req.params.index);
-    if (isNaN(index) || index >= urlIdInd) return res.status(404).json({error: "Invalid URL"});
+    if (isNaN(index) || index >= urlIdInd) return res.json({error: "Invalid URL"});
 
     console.log("redirigiendo a " + urlId[index]);
     return res.status(301).redirect(urlId[index]);
@@ -192,7 +192,7 @@ app.post('/api/shorturl', cors(corsOptions), function (req, res) {
         console.log("tras urlExists");
         if (!value) {
             console.log("no existe la url");
-            return res.status(401).json({error: "Invalid URL"});
+            return res.json({error: "Invalid URL"});
         }
 
         const urlParts = Url.parse(url);
