@@ -170,7 +170,7 @@ app.get('/api/shorturl/:index([0-9]{1,})', function (req, res) {
     console.log("index " + urlIdInd);
 
     let index = parseInt(req.params.index);
-    if (!NaN(index) || index >= urlIdInd) return res.status(404).json({error: "invalid url"});
+    if (isNaN(index) || index >= urlIdInd) return res.status(404).json({error: "invalid url"});
 
     console.log("redirigiendo a " + urlId[index]);
     return res.status(301).redirect(urlId[index]);
