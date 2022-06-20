@@ -23,9 +23,6 @@ const port = process.env.PORT || 3000;
 const dns = require("dns");
 // import dns from "dns";
 
-const dnsOptions = {
-    all: true,
-};
 
 // const XMLHttpRequest = require('xhr2');
 // const fetch = require('node-fetch');
@@ -40,7 +37,8 @@ const dnsOptions = {
 //
 // fetchUrl();
 
-const http = require("http");
+// const http = require("http");
+// const https = require("https");
 // import http from "http";
 const Url = require('url');
 // import {URL, parse} from 'url';
@@ -78,31 +76,43 @@ function urlExists(url) {
             resolve(false);
         }
 
-        const options = {
-            method: 'HEAD',
-            host: Url.parse(url).host,
-            path: Url.parse(url).pathname,
-            port: 80,
-        };
-
-        console.log(options);
-
-        // if (!options.host)
+        console.log(Url.parse(url));
+        const parsed = Url.parse(url);
+        dns.lookup(parsed.host, {all: true},
+            function (err, addresses) {
+                console.log("validando url post");
+                console.log(addresses);
+                console.log(err);
+                if (err || !addresses || !addresses.length) resolve(false);
+                resolve(true);
+            }
+        );
+        // const options = {
+        //     method: 'GET',
+        //     host: parse.host,
+        //     path: parse.path,
+        //     port: parse.protocol === 'https:' ? 443 : 80,
+        // };
+        //
+        // console.log(options);
+        //
+        // // if (!options.host)
+        // //     resolve(false);
+        //
+        //
+        // const req = http.request(url, {method: 'HEAD'}, (res) => {
+        //     console.log("resolviendo segun codigo de estado " + res.statusCode);
+        //     resolve(res.statusCode < 400 || res.statusCode >= 500);
+        // });
+        //
+        // req.on("error", function (err) {
+        //     console.log("error http request");
+        //     console.log(err);
         //     resolve(false);
-
-        const req = http.request(options, (res) => {
-            console.log("resolviendo segun codigo de estado " + res.statusCode);
-            resolve(res.statusCode < 400 || res.statusCode >= 500);
-        });
-
-        req.on("error", function (err) {
-            console.log("error http request");
-            console.log(err);
-            resolve(false);
-        });
+        // });
 
 
-        req.end();
+        // req.end();
     });
 }
 
@@ -185,18 +195,11 @@ app.post('/api/shorturl', cors(corsOptions), function (req, res) {
         const urlParts = Url.parse(url);
         console.log(urlParts);
 
-        dns.lookup(urlParts.host, dnsOptions,
-            function (err, addresses) {
-                console.log("validando url post");
-                console.log(addresses);
-                console.log(err);
-                if (err) return res.json({error: "invalid url"});
-                let index = urlId.indexOf(url);
-                if (index > -1) return res.json({original_url: url, short_url: index});
-                console.log("storing " + url);
-                urlId.push(url);
-                return res.json({original_url: url, short_url: urlIdInd++});
-            });
+        let index = urlId.indexOf(url);
+        if (index > -1) return res.json({original_url: url, short_url: index});
+        console.log("storing " + url);
+        urlId.push(url);
+        return res.json({original_url: url, short_url: urlIdInd++});
     });
 });
 
