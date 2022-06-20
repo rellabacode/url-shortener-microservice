@@ -173,7 +173,8 @@ app.get('/api/shorturl/:index([0-9]{1,})', cors(corsOptions), function (req, res
     if (isNaN(index) || index >= urlIdInd) return res.json({error: "Invalid URL"});
 
     console.log("redirigiendo a " + urlId[index]);
-    return res.status(301).redirect(urlId[index]);
+    res.header('Access-Control-Allow-Origin', "*");
+    return res.redirect(urlId[index]);
 });
 
 // function httpGet(theUrl)
