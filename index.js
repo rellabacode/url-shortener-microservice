@@ -87,16 +87,22 @@ function urlExists(url) {
 
         console.log(options);
 
-        try {
-            const req = http.request(options, (res) => {
-                console.log("resolviendo segun codigo de estado " + res.statusCode);
-                resolve(res.statusCode < 400 || res.statusCode >= 500);
-            });
-            req.end();
-        } catch (e) {
-            console.log(e);
+        // if (!options.host)
+        //     resolve(false);
+
+        const req = http.request(options, (res) => {
+            console.log("resolviendo segun codigo de estado " + res.statusCode);
+            resolve(res.statusCode < 400 || res.statusCode >= 500);
+        });
+
+        req.on("error", function (err) {
+            console.log("error http request");
+            console.log(err);
             resolve(false);
-        }
+        });
+
+
+        req.end();
     });
 }
 
@@ -170,6 +176,7 @@ app.post('/api/shorturl', cors(corsOptions), function (req, res) {
     let url = req.body.url;
     console.log("url " + url);
     urlExists(url).then(function (value) {
+        console.log("tras urlExists");
         if (!value) {
             console.log("no existe la url");
             return res.json({error: "invalid url"});
