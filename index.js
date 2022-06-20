@@ -87,12 +87,16 @@ function urlExists(url) {
 
         console.log(options);
 
-        const req = http.request(options, (res) => {
-            console.log("resolviendo segun codigo de estado " + res.statusCode);
-            resolve(res.statusCode < 400 || res.statusCode >= 500);
-        });
-
-        req.end();
+        try {
+            const req = http.request(options, (res) => {
+                console.log("resolviendo segun codigo de estado " + res.statusCode);
+                resolve(res.statusCode < 400 || res.statusCode >= 500);
+            });
+            req.end();
+        } catch (e) {
+            console.log(e);
+            resolve(false);
+        }
     });
 }
 
