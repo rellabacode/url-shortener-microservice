@@ -1,8 +1,5 @@
 const pactum = require("pactum");
-
-// console.log(pactum);
 const ENDPOINT = "http://localhost:3000/api/shorturl";
-
 const uris = ["http://www.google.es",
     "http://www.freecodecamp.com",
     "http://www.20minutos.com",
@@ -34,26 +31,10 @@ it('should return short_url', async function () {
     });
 });
 
-
 it('should visit the website', async function () {
-    console.log("lanzando el tercer test"+ENDPOINT + "/0");
-    // const response = await pactum.spec().get(ENDPOINT + "/0").toss();
-
     await pactum.spec().get(ENDPOINT + "/0").expectHeader('location', uris[0]);
     await pactum.spec().get(ENDPOINT + "/1").expectHeader('location', uris[1]);
     await pactum.spec().get(ENDPOINT + "/2").expectHeader('location', uris[2]);
     await pactum.spec().get(ENDPOINT + "/3").expectHeader('location', uris[3]);
     await pactum.spec().get(ENDPOINT + "/4").expectJsonMatch({error: "invalid url"});
-    // await pactum.spec().get(ENDPOINT + "/a").expectJsonMatch({error: "invalid url"});
-    // console.log(response.constructor);
-    // console.log(response.headers);
-    // console.log(response.headers["location"]);
-    // console.log(pactum.expect(response.headers));
-
-// .to.have.location("paco")
-
-    // pactum.expect(response).to.have.location(uris[0]);
-
-
-
 });
